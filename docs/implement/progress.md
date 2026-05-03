@@ -18,7 +18,7 @@ focused / low-complexity — infrastructure scaffold, sequential verify-mode cyc
 
 ## Plan
 
-1. Initialize Expo bare workflow (SDK 53+) in project root
+1. Initialize Expo bare workflow (SDK 54) in project root
 2. Configure TypeScript strict mode
 3. Set up ESLint + Prettier
 4. Set up Husky pre-commit hooks
@@ -33,7 +33,7 @@ focused / low-complexity — infrastructure scaffold, sequential verify-mode cyc
 ## PR Body Draft
 
 ## Summary
-Bootstraps the hlyst React Native project with Expo bare workflow (SDK 53+), TypeScript strict mode, ESLint + Prettier, Husky pre-commit hooks, GitHub Actions CI, and a first smoke test.
+Bootstraps the hlyst React Native project with Expo bare workflow (SDK 54), TypeScript strict mode, ESLint + Prettier, Husky pre-commit hooks, GitHub Actions CI, and a first smoke test.
 
 ## Stories completed
 - [ ] Set up Expo bare workflow project — scaffold, tooling, CI, first smoke test (closes #1)
