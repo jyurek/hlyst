@@ -12,7 +12,9 @@
       "Bash(gh issue *)",
       "Bash(gh label *)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('M1 number:', d['number']\\)\")",
-      "Bash(gh project *)"
+      "Bash(gh project *)",
+      "Skill(implement:build)",
+      "Skill(implement:skill-retro)"
     ]
   }
 }
