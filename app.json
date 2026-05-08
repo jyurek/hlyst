@@ -16,7 +16,14 @@
       "bundleIdentifier": "dog.gnar.hlyst",
       "supportsTablet": false,
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "156455cf-baa8-4cda-abce-6da9c60e161a"
       }
     }
   }
