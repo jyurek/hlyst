@@ -13,7 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "bundleIdentifier": "dog.gnar.hlyst",
+      "bundleIdentifier": "dev.verylargenumbers.hlyst",
       "supportsTablet": false,
       "infoPlist": {
         "UIBackgroundModes": ["audio"],
@@ -26,7 +26,7 @@
       }
     },
     "android": {
-      "package": "dog.gnar.hlyst"
+      "package": "dev.verylargenumbers.hlyst"
     }
   }
 }
