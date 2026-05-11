@@ -80,4 +80,20 @@ describe('parseFeed', () => {
   it('throws when channel element is missing', () => {
     expect(() => parseFeed('https://example.com/feed.xml', '<rss><notchannel/></rss>')).toThrow()
   })
+
+  it('handles CDATA-wrapped guid with attributes', () => {
+    const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Test</title>
+    <item>
+      <title>Ep</title>
+      <guid isPermaLink="false"><![CDATA[cdata-guid-123]]></guid>
+      <enclosure url="https://example.com/ep.mp3" type="audio/mpeg" length="0" />
+    </item>
+  </channel>
+</rss>`
+    const result = parseFeed('https://example.com/feed.xml', feed)
+    expect(result.episodes[0].guid).toBe('cdata-guid-123')
+  })
 })

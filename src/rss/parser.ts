@@ -36,13 +36,20 @@ function parseDuration(raw: unknown): number {
   return isNaN(n) ? 0 : n
 }
 
+function extractText(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'object' && '#text' in (value as object))
+    return String((value as Record<string, unknown>)['#text'])
+  return String(value)
+}
+
 function parseItems(raw: unknown): ParsedEpisode[] {
   if (!raw) return []
   const items = Array.isArray(raw) ? raw : [raw]
   return items
     .filter((item) => item?.enclosure?.['@_url'])
     .map((item) => ({
-      guid: String(item.guid ?? item.title ?? ''),
+      guid: extractText(item.guid) || extractText(item.title),
       title: String(item.title ?? ''),
       description: item.description ? String(item.description) : null,
       mediaUrl: String(item.enclosure['@_url']),
