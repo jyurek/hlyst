@@ -27,6 +27,7 @@
     },
     "android": {
       "package": "dev.verylargenumbers.hlyst"
-    }
+    },
+    "plugins": ["expo-sqlite"]
   }
 }
