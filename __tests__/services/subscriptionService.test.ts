@@ -88,7 +88,10 @@ describe('subscriptionService.subscribe', () => {
   it('fetches the feed URL', async () => {
     const service = createSubscriptionService(makeSubDao(), makeEpDao())
     await service.subscribe('https://example.com/feed.xml')
-    expect(global.fetch).toHaveBeenCalledWith('https://example.com/feed.xml')
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://example.com/feed.xml',
+      expect.objectContaining({ headers: expect.any(Object) }),
+    )
   })
 
   it('inserts the subscription', async () => {

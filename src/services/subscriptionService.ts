@@ -1,3 +1,4 @@
+import * as ExpoCrypto from 'expo-crypto'
 import { parseFeed } from '../rss/parser'
 import type { SubscriptionDao } from '../db/dao/subscriptionDao'
 import type { EpisodeDao } from '../db/dao/episodeDao'
@@ -17,7 +18,9 @@ export function createSubscriptionService(
       const existing = await subscriptionDao.findByFeedUrl(feedUrl)
       if (existing) throw new Error('Already subscribed to this feed')
 
-      const response = await fetch(feedUrl)
+      const response = await fetch(feedUrl, {
+        headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' },
+      })
       if (!response.ok) throw new Error(`Failed to fetch feed: HTTP ${response.status}`)
 
       const xml = await response.text()
@@ -25,7 +28,7 @@ export function createSubscriptionService(
 
       const now = Date.now()
       const subscription = await subscriptionDao.insert({
-        id: crypto.randomUUID(),
+        id: ExpoCrypto.randomUUID(),
         feedUrl: feed.feedUrl,
         title: feed.title,
         imageUrl: feed.imageUrl,
@@ -38,7 +41,7 @@ export function createSubscriptionService(
         const exists = await episodeDao.findByGuid(subscription.id, ep.guid)
         if (exists) continue
         await episodeDao.insert({
-          id: crypto.randomUUID(),
+          id: ExpoCrypto.randomUUID(),
           subscriptionId: subscription.id,
           guid: ep.guid,
           title: ep.title,
