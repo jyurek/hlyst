@@ -78,7 +78,11 @@ export function LibraryScreen({ subscriptionService, subscriptionDao }: Props) {
           editable={!loading}
         />
         <TouchableOpacity style={styles.addButton} onPress={handleAdd} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.addButtonText}>Add</Text>}
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.addButtonText}>Add</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -91,16 +95,16 @@ export function LibraryScreen({ subscriptionService, subscriptionDao }: Props) {
           <View style={styles.row}>
             <View style={styles.rowText}>
               <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.feedUrl} numberOfLines={1}>{item.feedUrl}</Text>
+              <Text style={styles.feedUrl} numberOfLines={1}>
+                {item.feedUrl}
+              </Text>
             </View>
             <TouchableOpacity onPress={() => handleDelete(item)}>
               <Text style={styles.remove}>Remove</Text>
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No podcasts yet. Add one above.</Text>
-        }
+        ListEmptyComponent={<Text style={styles.empty}>No podcasts yet. Add one above.</Text>}
       />
     </View>
   )

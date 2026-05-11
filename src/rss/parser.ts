@@ -57,8 +57,7 @@ export function parseFeed(feedUrl: string, xml: string): ParsedFeed {
   const channel = result?.rss?.channel
   if (!channel) throw new Error('Invalid RSS feed: missing <channel>')
 
-  const imageUrl =
-    channel['itunes:image']?.['@_href'] ?? channel.image?.url ?? null
+  const imageUrl = channel['itunes:image']?.['@_href'] ?? channel.image?.url ?? null
 
   return {
     feedUrl,
