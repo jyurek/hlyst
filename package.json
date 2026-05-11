@@ -4,20 +4,23 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "test": "jest --watchAll=false",
     "test:watch": "jest",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "android": "expo run:android"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~54.0.33",
+    "expo-crypto": "~15.0.9",
     "expo-dev-client": "~6.0.21",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
+    "fast-xml-parser": "^5.7.3",
     "react": "19.1.0",
     "react-native": "0.81.5"
   },
@@ -39,6 +42,9 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": [
+      "./jest-setup.ts"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)"
     ]

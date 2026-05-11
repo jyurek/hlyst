@@ -1,38 +1,33 @@
-# Issue #2 — Define local data model and storage layer
+# Issue #3 — Subscribe to a podcast via RSS URL
 
 ## Header
 
-- **Branch:** feat/data-model-storage
+- **Branch:** feat/subscribe-rss-url
 - **Base branch:** main
 - **PR strategy:** one
 - **Skill-retro:** yes
-- **Timestamp:** 2026-05-08
+- **Timestamp:** 2026-05-11
 
 ## Plan Summary
 
-Install expo-sqlite and AsyncStorage. Define TypeScript types for all entities. Build a forward-only migration runner. Implement typed DAO factories (dependency injection) for 6 entities. Wrap AsyncStorage with a typed key-value store.
+Install fast-xml-parser. Build RSS 2.0 + iTunes namespace parser (fetch → parse → typed structs). Build a subscriptionService that orchestrates fetch/parse/persist/delete via existing DAOs. Build LibraryScreen UI (add URL input, subscription list, delete). Wire into App.tsx.
 
 ## Stories
 
-- [ ] Foundation: types + migration runner + db init
-- [ ] SubscriptionDao
-- [ ] EpisodeDao
-- [ ] QueueDao
-- [ ] RuleDao
-- [ ] DownloadDao
-- [ ] PlaybackStateDao
-- [ ] KeyValueStore
+- [ ] TDD cycle 1: RSS parser (src/rss/parser.ts)
+- [ ] TDD cycle 2: subscriptionService (src/services/subscriptionService.ts)
+- [ ] Cycle 3: LibraryScreen + App wiring (verify-mode)
 
 ## PR Body Draft
 
 ## Summary
-Define the local data model and storage layer for hlyst using expo-sqlite with typed DAOs and AsyncStorage for hot-path key-value writes.
+Implements RSS subscription via URL paste. Users can add a podcast by URL, see it in a library list, and remove it — all backed by the SQLite DAOs from issue #2.
 
 ## Stories completed
-- [ ] Foundation: types, schema migrations, migration runner, DB init (closes #2)
+- [ ] RSS parser + subscription service + library UI (closes #3)
 
 ## Test plan
-- All DAOs tested with mock db via dependency injection
-- Migration runner tested with mock db
-- AsyncStorage wrapper tested with jest mock
+- RSS parser unit tests (valid feed, malformed XML, missing duration)
+- Subscription service unit tests (mock DAOs)
 - tsc --noEmit passes
+- npm test passes
