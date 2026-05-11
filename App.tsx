@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar'
 import { openDatabase, type Database } from './src/db/database'
 import { createSubscriptionService } from './src/services/subscriptionService'
 import { createPlayerService, type PlayerService } from './src/services/playerService'
+import { createFeedRefreshService } from './src/services/feedRefreshService'
+import { registerBackgroundFetch } from './src/tasks/backgroundRefreshTask'
 import { LibraryScreen } from './src/screens/LibraryScreen'
 import { PlayerScreen } from './src/screens/PlayerScreen'
 import type { Episode, Subscription } from './src/db/types'
@@ -17,6 +19,10 @@ export default function App() {
     openDatabase().then((opened) => {
       setDb(opened)
       playerService.current.setup().catch(console.error)
+      registerBackgroundFetch().catch(console.error)
+      createFeedRefreshService(opened.subscriptions, opened.episodes)
+        .refreshAll()
+        .catch(console.error)
     })
   }, [])
 

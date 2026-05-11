@@ -20,6 +20,14 @@ jest.mock('react-native-track-player', () => ({
   registerPlaybackService: jest.fn(),
   default: { registerPlaybackService: jest.fn() },
 }))
+jest.mock('../src/services/feedRefreshService', () => ({
+  createFeedRefreshService: jest
+    .fn()
+    .mockReturnValue({ refreshAll: jest.fn().mockResolvedValue({ refreshed: 0, failed: 0 }) }),
+}))
+jest.mock('../src/tasks/backgroundRefreshTask', () => ({
+  registerBackgroundFetch: jest.fn().mockResolvedValue(undefined),
+}))
 
 it('App exports a React component', () => {
   expect(typeof App).toBe('function')

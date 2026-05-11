@@ -58,6 +58,7 @@ function makeSubDao(overrides: Partial<SubscriptionDao> = {}): SubscriptionDao {
     findByFeedUrl: jest.fn().mockResolvedValue(null),
     findAll: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
+    updateLastFetchedAt: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   }
 }
