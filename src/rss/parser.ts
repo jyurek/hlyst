@@ -22,8 +22,6 @@ const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
   allowBooleanAttributes: true,
-  // Treat HTML-bearing nodes as raw text so we never walk their nested tags
-  stopNodes: ['*.content:encoded', '*.description', '*.itunes:summary'],
   maxNestedTags: 1000,
 })
 
