@@ -35,7 +35,9 @@ function makeEpisode(overrides: Partial<Episode> = {}): Episode {
 }
 
 describe('playerService', () => {
-  let TrackPlayer: ReturnType<typeof jest.mocked<typeof import('react-native-track-player').default>>
+  let TrackPlayer: ReturnType<
+    typeof jest.mocked<typeof import('react-native-track-player').default>
+  >
 
   beforeEach(() => {
     TrackPlayer = require('react-native-track-player')

@@ -19,7 +19,11 @@ interface Props {
   onSelectSubscription?: (sub: Subscription) => void
 }
 
-export function LibraryScreen({ subscriptionService, subscriptionDao, onSelectSubscription }: Props) {
+export function LibraryScreen({
+  subscriptionService,
+  subscriptionDao,
+  onSelectSubscription,
+}: Props) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
