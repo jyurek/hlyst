@@ -16,9 +16,10 @@ import type { SubscriptionDao } from '../db/dao/subscriptionDao'
 interface Props {
   subscriptionService: SubscriptionService
   subscriptionDao: SubscriptionDao
+  onSelectSubscription?: (sub: Subscription) => void
 }
 
-export function LibraryScreen({ subscriptionService, subscriptionDao }: Props) {
+export function LibraryScreen({ subscriptionService, subscriptionDao, onSelectSubscription }: Props) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -92,7 +93,11 @@ export function LibraryScreen({ subscriptionService, subscriptionDao }: Props) {
         data={subscriptions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.row}>
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => onSelectSubscription?.(item)}
+            disabled={!onSelectSubscription}
+          >
             <View style={styles.rowText}>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.feedUrl} numberOfLines={1}>
@@ -102,7 +107,7 @@ export function LibraryScreen({ subscriptionService, subscriptionDao }: Props) {
             <TouchableOpacity onPress={() => handleDelete(item)}>
               <Text style={styles.remove}>Remove</Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No podcasts yet. Add one above.</Text>}
       />
