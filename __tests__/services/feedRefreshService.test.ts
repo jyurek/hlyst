@@ -143,7 +143,10 @@ describe('feedRefreshService.refreshAll', () => {
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ ok: false, status: 404 })
       .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve(FEED_XML) })
-    const subDaoWithUpdate = { ...subDao, updateLastFetchedAt: jest.fn().mockResolvedValue(undefined) }
+    const subDaoWithUpdate = {
+      ...subDao,
+      updateLastFetchedAt: jest.fn().mockResolvedValue(undefined),
+    }
     const service = createFeedRefreshService(subDaoWithUpdate, makeEpDao())
     await service.refreshAll()
     expect(subDaoWithUpdate.updateLastFetchedAt).toHaveBeenCalledTimes(1)
