@@ -54,7 +54,7 @@ export function createEpisodeDao(db: Db): EpisodeDao {
     async insert(e) {
       const downloadStatus = e.downloadStatus ?? 'none'
       const isArchived = e.isArchived ?? false
-      await db.runAsync(
+      const result = await db.runAsync(
         `INSERT OR IGNORE INTO episodes (id, subscription_id, guid, title, description, duration, published_at, media_url, file_size, download_status, local_path, played_at, is_archived, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         e.id,
@@ -72,6 +72,16 @@ export function createEpisodeDao(db: Db): EpisodeDao {
         isArchived ? 1 : 0,
         e.createdAt,
       )
+      // INSERT OR IGNORE silently skips duplicates — return the canonical persisted row
+      if (result.changes === 0) {
+        const row = await db.getFirstAsync<Row>(
+          `SELECT ${COLUMNS} FROM episodes WHERE subscription_id = ? AND guid = ?`,
+          e.subscriptionId,
+          e.guid,
+        )
+        if (!row) throw new Error(`episodeDao.insert: no row found for guid ${e.guid}`)
+        return rowToEpisode(row)
+      }
       return {
         id: e.id,
         subscriptionId: e.subscriptionId,
