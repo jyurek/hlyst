@@ -1,6 +1,7 @@
 import {
   BACKGROUND_FETCH_TASK,
   registerBackgroundFetch,
+  defineBackgroundRefreshTask,
 } from '../../src/tasks/backgroundRefreshTask'
 import * as BackgroundFetch from 'expo-background-fetch'
 import * as TaskManager from 'expo-task-manager'
@@ -52,9 +53,9 @@ describe('backgroundRefreshTask', () => {
       return (TaskManager.defineTask as jest.Mock).mock.calls.at(-1)[1]
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       jest.clearAllMocks()
-      await registerBackgroundFetch()
+      defineBackgroundRefreshTask()
     })
 
     it('returns NewData when episodes were refreshed', async () => {

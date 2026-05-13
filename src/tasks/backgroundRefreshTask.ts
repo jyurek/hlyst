@@ -24,7 +24,6 @@ export function defineBackgroundRefreshTask(): void {
 }
 
 export async function registerBackgroundFetch(): Promise<void> {
-  defineBackgroundRefreshTask()
   await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
     minimumInterval: MINIMUM_FETCH_INTERVAL_SECONDS,
     stopOnTerminate: false,
