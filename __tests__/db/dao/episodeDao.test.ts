@@ -41,7 +41,7 @@ describe('episodeDao', () => {
       const dao = createEpisodeDao(db)
       const result = await dao.insert(newEpisode)
       const [sql, ...args] = (db.runAsync as jest.Mock).mock.calls[0]
-      expect(sql).toContain('INSERT INTO episodes')
+      expect(sql).toContain('INSERT OR IGNORE INTO episodes')
       expect(args).toContain('ep-1')
       expect(args).toContain('sub-1')
       expect(args).toContain('none') // default downloadStatus

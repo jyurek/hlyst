@@ -16,7 +16,10 @@
       "bundleIdentifier": "dev.verylargenumbers.hlyst",
       "supportsTablet": false,
       "infoPlist": {
-        "UIBackgroundModes": ["audio", "fetch"],
+        "UIBackgroundModes": [
+          "audio",
+          "fetch"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -28,6 +31,9 @@
     "android": {
       "package": "dev.verylargenumbers.hlyst"
     },
-    "plugins": ["expo-sqlite"]
+    "plugins": [
+      "expo-sqlite",
+      "expo-background-task"
+    ]
   }
 }

@@ -3,12 +3,22 @@ import { parseFeed, type ParsedFeed, type ParsedEpisode } from '../rss/parser'
 import type { EpisodeDao } from '../db/dao/episodeDao'
 
 const FEED_REQUEST_HEADERS = { Accept: 'application/rss+xml, application/xml, text/xml, */*' }
+const FETCH_TIMEOUT_MS = 10_000
 
 export async function fetchFeed(feedUrl: string): Promise<ParsedFeed> {
-  const response = await fetch(feedUrl, { headers: FEED_REQUEST_HEADERS })
-  if (!response.ok) throw new Error(`HTTP ${response.status}`)
-  const xml = await response.text()
-  return parseFeed(feedUrl, xml)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    const response = await fetch(feedUrl, {
+      headers: FEED_REQUEST_HEADERS,
+      signal: controller.signal,
+    })
+    if (!response.ok) throw new Error(`Failed to fetch feed: HTTP ${response.status}`)
+    const xml = await response.text()
+    return parseFeed(feedUrl, xml)
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 export async function ingestEpisodes(
@@ -18,8 +28,6 @@ export async function ingestEpisodes(
   now: number,
 ): Promise<void> {
   for (const ep of episodes) {
-    const exists = await episodeDao.findByGuid(subscriptionId, ep.guid)
-    if (exists) continue
     await episodeDao.insert({
       id: ExpoCrypto.randomUUID(),
       subscriptionId,

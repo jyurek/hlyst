@@ -12,6 +12,7 @@ import type { Episode, Subscription } from './src/db/types'
 
 export default function App() {
   const [db, setDb] = useState<Database | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const playerService = useRef<PlayerService>(createPlayerService())
 
@@ -19,12 +20,19 @@ export default function App() {
     void (async () => {
       const opened = await openDatabase()
       setDb(opened)
-      await Promise.all([
+      const results = await Promise.allSettled([
         playerService.current.setup(),
         registerBackgroundFetch(),
-        createFeedRefreshService(opened.subscriptions, opened.episodes).refreshAll(),
+        createFeedRefreshService(opened.subscriptions, opened.episodes)
+          .refreshAll()
+          .then(() => setRefreshKey((k) => k + 1)),
       ])
-    })().catch((err) => console.error('[App] startup failed:', err))
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          console.error('[App] startup task failed:', result.reason)
+        }
+      }
+    })().catch((err) => console.error('[App] failed to open database:', err))
   }, [])
 
   async function handleSelectSubscription(sub: Subscription, episodeDao: Database['episodes']) {
@@ -52,6 +60,7 @@ export default function App() {
       <LibraryScreen
         subscriptionService={service}
         subscriptionDao={db.subscriptions}
+        refreshKey={refreshKey}
         onSelectSubscription={(sub) => handleSelectSubscription(sub, db.episodes)}
       />
       {currentEpisode ? (

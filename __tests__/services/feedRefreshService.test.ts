@@ -78,14 +78,21 @@ function makeEpDao(overrides: Partial<EpisodeDao> = {}): EpisodeDao {
 global.fetch = jest.fn()
 
 describe('feedRefreshService.refreshAll', () => {
+  let consoleErrorSpy: jest.SpyInstance
+
   beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       text: () => Promise.resolve(FEED_XML),
     })
   })
 
-  it('fetches each subscription feed URL', async () => {
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('fetches each subscription feed URL with the correct Accept header', async () => {
     const sub1 = makeSub({ id: 'sub-1', feedUrl: 'https://example.com/feed1.xml' })
     const sub2 = makeSub({ id: 'sub-2', feedUrl: 'https://example.com/feed2.xml' })
     const subDao = makeSubDao({ findAll: jest.fn().mockResolvedValue([sub1, sub2]) })
@@ -93,28 +100,25 @@ describe('feedRefreshService.refreshAll', () => {
     await service.refreshAll()
     expect(global.fetch).toHaveBeenCalledWith(
       'https://example.com/feed1.xml',
-      expect.objectContaining({ headers: expect.any(Object) }),
+      expect.objectContaining({
+        headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' },
+      }),
     )
     expect(global.fetch).toHaveBeenCalledWith(
       'https://example.com/feed2.xml',
-      expect.objectContaining({ headers: expect.any(Object) }),
+      expect.objectContaining({
+        headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' },
+      }),
     )
   })
 
-  it('inserts new episodes not already in the db', async () => {
+  it('inserts new episodes from the feed', async () => {
     const epDao = makeEpDao()
     const service = createFeedRefreshService(makeSubDao(), epDao)
     await service.refreshAll()
     expect(epDao.insert).toHaveBeenCalledWith(
       expect.objectContaining({ guid: 'g1', title: 'Ep 1' }),
     )
-  })
-
-  it('skips episodes already in the db by guid', async () => {
-    const epDao = makeEpDao({ findByGuid: jest.fn().mockResolvedValue(makeEpisode()) })
-    const service = createFeedRefreshService(makeSubDao(), epDao)
-    await service.refreshAll()
-    expect(epDao.insert).not.toHaveBeenCalled()
   })
 
   it('updates lastFetchedAt on the subscription after a successful fetch', async () => {

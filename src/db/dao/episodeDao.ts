@@ -55,7 +55,7 @@ export function createEpisodeDao(db: Db): EpisodeDao {
       const downloadStatus = e.downloadStatus ?? 'none'
       const isArchived = e.isArchived ?? false
       await db.runAsync(
-        `INSERT INTO episodes (id, subscription_id, guid, title, description, duration, published_at, media_url, file_size, download_status, local_path, played_at, is_archived, created_at)
+        `INSERT OR IGNORE INTO episodes (id, subscription_id, guid, title, description, duration, published_at, media_url, file_size, download_status, local_path, played_at, is_archived, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         e.id,
         e.subscriptionId,
