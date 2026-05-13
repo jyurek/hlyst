@@ -16,12 +16,14 @@ import type { SubscriptionDao } from '../db/dao/subscriptionDao'
 interface Props {
   subscriptionService: SubscriptionService
   subscriptionDao: SubscriptionDao
+  refreshKey?: number
   onSelectSubscription?: (sub: Subscription) => void
 }
 
 export function LibraryScreen({
   subscriptionService,
   subscriptionDao,
+  refreshKey,
   onSelectSubscription,
 }: Props) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
@@ -36,7 +38,7 @@ export function LibraryScreen({
 
   useEffect(() => {
     loadSubscriptions()
-  }, [loadSubscriptions])
+  }, [loadSubscriptions, refreshKey])
 
   async function handleAdd() {
     if (!url.trim()) return

@@ -4,20 +4,37 @@ import { StatusBar } from 'expo-status-bar'
 import { openDatabase, type Database } from './src/db/database'
 import { createSubscriptionService } from './src/services/subscriptionService'
 import { createPlayerService, type PlayerService } from './src/services/playerService'
+import { createFeedRefreshService } from './src/services/feedRefreshService'
+import { registerBackgroundFetch } from './src/tasks/backgroundRefreshTask'
 import { LibraryScreen } from './src/screens/LibraryScreen'
 import { PlayerScreen } from './src/screens/PlayerScreen'
 import type { Episode, Subscription } from './src/db/types'
 
 export default function App() {
   const [db, setDb] = useState<Database | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const playerService = useRef<PlayerService>(createPlayerService())
 
   useEffect(() => {
-    openDatabase().then((opened) => {
+    void (async () => {
+      const opened = await openDatabase()
       setDb(opened)
-      playerService.current.setup().catch(console.error)
-    })
+      const results = await Promise.allSettled([
+        playerService.current.setup(),
+        registerBackgroundFetch(),
+        createFeedRefreshService(opened.subscriptions, opened.episodes)
+          .refreshAll()
+          .then(({ refreshed }) => {
+            if (refreshed > 0) setRefreshKey((k) => k + 1)
+          }),
+      ])
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          console.error('[App] startup task failed:', result.reason)
+        }
+      }
+    })().catch((err) => console.error('[App] failed to open database:', err))
   }, [])
 
   async function handleSelectSubscription(sub: Subscription, episodeDao: Database['episodes']) {
@@ -45,6 +62,7 @@ export default function App() {
       <LibraryScreen
         subscriptionService={service}
         subscriptionDao={db.subscriptions}
+        refreshKey={refreshKey}
         onSelectSubscription={(sub) => handleSelectSubscription(sub, db.episodes)}
       />
       {currentEpisode ? (

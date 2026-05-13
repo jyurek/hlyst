@@ -28,6 +28,7 @@ export interface SubscriptionDao {
   findByFeedUrl(feedUrl: string): Promise<Subscription | null>
   findAll(): Promise<Subscription[]>
   delete(id: string): Promise<void>
+  updateLastFetchedAt(id: string, ts: number): Promise<void>
 }
 
 export function createSubscriptionDao(db: Db): SubscriptionDao {
@@ -79,6 +80,10 @@ export function createSubscriptionDao(db: Db): SubscriptionDao {
 
     async delete(id) {
       await db.runAsync('DELETE FROM subscriptions WHERE id = ?', id)
+    },
+
+    async updateLastFetchedAt(id, ts) {
+      await db.runAsync('UPDATE subscriptions SET last_fetched_at = ? WHERE id = ?', ts, id)
     },
   }
 }

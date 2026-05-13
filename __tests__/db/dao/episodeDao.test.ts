@@ -41,12 +41,21 @@ describe('episodeDao', () => {
       const dao = createEpisodeDao(db)
       const result = await dao.insert(newEpisode)
       const [sql, ...args] = (db.runAsync as jest.Mock).mock.calls[0]
-      expect(sql).toContain('INSERT INTO episodes')
+      expect(sql).toContain('INSERT OR IGNORE INTO episodes')
       expect(args).toContain('ep-1')
       expect(args).toContain('sub-1')
       expect(args).toContain('none') // default downloadStatus
       expect(result.downloadStatus).toBe('none')
       expect(result.isArchived).toBe(false)
+    })
+
+    it('returns the existing DB row when INSERT OR IGNORE silently skips a duplicate', async () => {
+      const db = makeDb()
+      db.runAsync.mockResolvedValueOnce({ lastInsertRowId: 0, changes: 0 })
+      db.getFirstAsync.mockResolvedValueOnce(dbRow)
+      const dao = createEpisodeDao(db)
+      const result = await dao.insert({ ...newEpisode, id: 'new-uuid-never-written' })
+      expect(result.id).toBe('ep-1') // id from the existing DB row, not the caller-supplied UUID
     })
   })
 

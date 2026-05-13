@@ -58,6 +58,7 @@ function makeSubDao(overrides: Partial<SubscriptionDao> = {}): SubscriptionDao {
     findByFeedUrl: jest.fn().mockResolvedValue(null),
     findAll: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
+    updateLastFetchedAt: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   }
 }
@@ -85,12 +86,14 @@ describe('subscriptionService.subscribe', () => {
     })
   })
 
-  it('fetches the feed URL', async () => {
+  it('fetches the feed URL with the correct Accept header', async () => {
     const service = createSubscriptionService(makeSubDao(), makeEpDao())
     await service.subscribe('https://example.com/feed.xml')
     expect(global.fetch).toHaveBeenCalledWith(
       'https://example.com/feed.xml',
-      expect.objectContaining({ headers: expect.any(Object) }),
+      expect.objectContaining({
+        headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' },
+      }),
     )
   })
 
@@ -122,15 +125,6 @@ describe('subscriptionService.subscribe', () => {
     )
   })
 
-  it('skips episodes already in the db (by guid)', async () => {
-    const epDao = makeEpDao({
-      findByGuid: jest.fn().mockResolvedValue(makeEpisode()),
-    })
-    const service = createSubscriptionService(makeSubDao(), epDao)
-    await service.subscribe('https://example.com/feed.xml')
-    expect(epDao.insert).not.toHaveBeenCalled()
-  })
-
   it('throws when the feed URL is already subscribed', async () => {
     const subDao = makeSubDao({
       findByFeedUrl: jest.fn().mockResolvedValue(makeSub()),
@@ -141,10 +135,12 @@ describe('subscriptionService.subscribe', () => {
     )
   })
 
-  it('throws a descriptive error when fetch fails', async () => {
+  it('throws a descriptive error including the HTTP status when fetch fails', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404 })
     const service = createSubscriptionService(makeSubDao(), makeEpDao())
-    await expect(service.subscribe('https://example.com/feed.xml')).rejects.toThrow(/404/)
+    await expect(service.subscribe('https://example.com/feed.xml')).rejects.toThrow(
+      'Failed to fetch feed: HTTP 404',
+    )
   })
 
   it('throws on malformed XML without corrupting the db', async () => {
