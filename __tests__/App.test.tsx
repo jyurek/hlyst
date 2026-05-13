@@ -2,6 +2,7 @@ import App from '../App'
 
 jest.mock('../src/screens/LibraryScreen', () => ({ LibraryScreen: () => null }))
 jest.mock('../src/screens/PlayerScreen', () => ({ PlayerScreen: () => null }))
+jest.mock('../src/screens/QueueScreen', () => ({ QueueScreen: () => null }))
 jest.mock('../src/db/database', () => ({ openDatabase: jest.fn() }))
 jest.mock('../src/services/subscriptionService', () => ({
   createSubscriptionService: jest.fn(),

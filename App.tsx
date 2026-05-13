@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { View, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { openDatabase, type Database } from './src/db/database'
 import { createSubscriptionService } from './src/services/subscriptionService'
@@ -8,12 +8,20 @@ import { createFeedRefreshService } from './src/services/feedRefreshService'
 import { registerBackgroundFetch } from './src/tasks/backgroundRefreshTask'
 import { LibraryScreen } from './src/screens/LibraryScreen'
 import { PlayerScreen } from './src/screens/PlayerScreen'
+import { QueueScreen } from './src/screens/QueueScreen'
 import type { Episode, Subscription } from './src/db/types'
+
+type Tab = 'library' | 'queue'
 
 export default function App() {
   const [db, setDb] = useState<Database | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
+  const [currentSubscriptionImageUrl, setCurrentSubscriptionImageUrl] = useState<string | null>(
+    null,
+  )
+  const [currentPodcastName, setCurrentPodcastName] = useState('')
+  const [activeTab, setActiveTab] = useState<Tab>('library')
   const playerService = useRef<PlayerService>(createPlayerService())
 
   useEffect(() => {
@@ -42,6 +50,8 @@ export default function App() {
     if (!episodes.length) return
     const episode = episodes[0]
     setCurrentEpisode(episode)
+    setCurrentSubscriptionImageUrl(sub.imageUrl)
+    setCurrentPodcastName(sub.title)
     await playerService.current.loadEpisode(episode)
     await playerService.current.play()
   }
@@ -59,15 +69,40 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      <LibraryScreen
-        subscriptionService={service}
-        subscriptionDao={db.subscriptions}
-        refreshKey={refreshKey}
-        onSelectSubscription={(sub) => handleSelectSubscription(sub, db.episodes)}
-      />
+      <View style={styles.screenArea}>
+        {activeTab === 'library' ? (
+          <LibraryScreen
+            subscriptionService={service}
+            subscriptionDao={db.subscriptions}
+            refreshKey={refreshKey}
+            onSelectSubscription={(sub) => handleSelectSubscription(sub, db.episodes)}
+          />
+        ) : (
+          <QueueScreen />
+        )}
+      </View>
+
       {currentEpisode ? (
-        <PlayerScreen episode={currentEpisode} playerService={playerService.current} />
+        <PlayerScreen
+          episode={currentEpisode}
+          playerService={playerService.current}
+          imageUrl={currentSubscriptionImageUrl}
+          podcastName={currentPodcastName}
+          onQueuePress={() => setActiveTab('queue')}
+        />
       ) : null}
+
+      <View style={styles.tabBar}>
+        <TouchableOpacity style={styles.tab} onPress={() => setActiveTab('library')}>
+          <Text style={[styles.tabText, activeTab === 'library' && styles.tabTextActive]}>
+            Library
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tab} onPress={() => setActiveTab('queue')}>
+          <Text style={[styles.tabText, activeTab === 'queue' && styles.tabTextActive]}>Queue</Text>
+        </TouchableOpacity>
+      </View>
+
       <StatusBar style="auto" />
     </View>
   )
@@ -76,4 +111,24 @@ export default function App() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  screenArea: { flex: 1 },
+  tabBar: {
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#ddd',
+    backgroundColor: '#fff',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  tabText: {
+    fontSize: 15,
+    color: '#888',
+  },
+  tabTextActive: {
+    color: '#007AFF',
+    fontWeight: '700',
+  },
 })
