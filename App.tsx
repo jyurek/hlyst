@@ -16,14 +16,15 @@ export default function App() {
   const playerService = useRef<PlayerService>(createPlayerService())
 
   useEffect(() => {
-    openDatabase().then((opened) => {
+    void (async () => {
+      const opened = await openDatabase()
       setDb(opened)
-      playerService.current.setup().catch(console.error)
-      registerBackgroundFetch().catch(console.error)
-      createFeedRefreshService(opened.subscriptions, opened.episodes)
-        .refreshAll()
-        .catch(console.error)
-    })
+      await Promise.all([
+        playerService.current.setup(),
+        registerBackgroundFetch(),
+        createFeedRefreshService(opened.subscriptions, opened.episodes).refreshAll(),
+      ])
+    })().catch((err) => console.error('[App] startup failed:', err))
   }, [])
 
   async function handleSelectSubscription(sub: Subscription, episodeDao: Database['episodes']) {

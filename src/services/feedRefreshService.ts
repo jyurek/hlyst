@@ -1,7 +1,6 @@
-import * as ExpoCrypto from 'expo-crypto'
-import { parseFeed } from '../rss/parser'
 import type { SubscriptionDao } from '../db/dao/subscriptionDao'
 import type { EpisodeDao } from '../db/dao/episodeDao'
+import { fetchFeed, ingestEpisodes } from './feedIngestion'
 
 export interface FeedRefreshService {
   refreshAll(): Promise<{ refreshed: number; failed: number }>
@@ -19,32 +18,9 @@ export function createFeedRefreshService(
 
       for (const sub of subscriptions) {
         try {
-          const response = await fetch(sub.feedUrl, {
-            headers: { Accept: 'application/rss+xml, application/xml, text/xml, */*' },
-          })
-          if (!response.ok) throw new Error(`HTTP ${response.status}`)
-
-          const xml = await response.text()
-          const feed = parseFeed(sub.feedUrl, xml)
-
           const now = Date.now()
-          for (const ep of feed.episodes) {
-            const exists = await episodeDao.findByGuid(sub.id, ep.guid)
-            if (exists) continue
-            await episodeDao.insert({
-              id: ExpoCrypto.randomUUID(),
-              subscriptionId: sub.id,
-              guid: ep.guid,
-              title: ep.title,
-              description: ep.description,
-              duration: ep.duration,
-              publishedAt: ep.publishedAt,
-              mediaUrl: ep.mediaUrl,
-              fileSize: ep.fileSize,
-              createdAt: now,
-            })
-          }
-
+          const feed = await fetchFeed(sub.feedUrl)
+          await ingestEpisodes(sub.id, feed.episodes, episodeDao, now)
           await subscriptionDao.updateLastFetchedAt(sub.id, now)
           refreshed++
         } catch (err) {

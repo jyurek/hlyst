@@ -143,14 +143,10 @@ describe('feedRefreshService.refreshAll', () => {
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce({ ok: false, status: 404 })
       .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve(FEED_XML) })
-    const subDaoWithUpdate = {
-      ...subDao,
-      updateLastFetchedAt: jest.fn().mockResolvedValue(undefined),
-    }
-    const service = createFeedRefreshService(subDaoWithUpdate, makeEpDao())
+    const service = createFeedRefreshService(subDao, makeEpDao())
     await service.refreshAll()
-    expect(subDaoWithUpdate.updateLastFetchedAt).toHaveBeenCalledTimes(1)
-    expect(subDaoWithUpdate.updateLastFetchedAt).toHaveBeenCalledWith('sub-2', expect.any(Number))
+    expect(subDao.updateLastFetchedAt).toHaveBeenCalledTimes(1)
+    expect(subDao.updateLastFetchedAt).toHaveBeenCalledWith('sub-2', expect.any(Number))
   })
 
   it('continues processing when one feed has malformed XML', async () => {
