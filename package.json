@@ -50,7 +50,10 @@
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-track-player)"
-    ]
+    ],
+    "moduleNameMapper": {
+      "react-native/Libraries/NativeComponent/ViewConfigIgnore": "<rootDir>/__mocks__/stubs/ViewConfigIgnore.js"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": "eslint --fix",
