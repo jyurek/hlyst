@@ -25,7 +25,9 @@ export default function App() {
         registerBackgroundFetch(),
         createFeedRefreshService(opened.subscriptions, opened.episodes)
           .refreshAll()
-          .then(() => setRefreshKey((k) => k + 1)),
+          .then(({ refreshed }) => {
+            if (refreshed > 0) setRefreshKey((k) => k + 1)
+          }),
       ])
       for (const result of results) {
         if (result.status === 'rejected') {

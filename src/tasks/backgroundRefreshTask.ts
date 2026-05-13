@@ -37,6 +37,7 @@ export async function registerBackgroundFetch(): Promise<void> {
   const status = await BackgroundTask.getStatusAsync()
   if (status !== BackgroundTaskStatus.Available) {
     console.warn('[backgroundRefresh] Background tasks unavailable (status:', status, ')')
+    return
   }
   await BackgroundTask.registerTaskAsync(BACKGROUND_FETCH_TASK, {
     minimumInterval: MINIMUM_FETCH_INTERVAL_MINUTES,

@@ -54,6 +54,15 @@ describe('backgroundRefreshTask', () => {
         expect.objectContaining({ minimumInterval: 30 }),
       )
     })
+
+    it('skips registration when background tasks are unavailable', async () => {
+      jest.clearAllMocks()
+      ;(BackgroundTask.getStatusAsync as jest.Mock).mockResolvedValueOnce(1) // Restricted
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      await registerBackgroundFetch()
+      expect(BackgroundTask.registerTaskAsync).not.toHaveBeenCalled()
+      warnSpy.mockRestore()
+    })
   })
 
   describe('task handler', () => {
