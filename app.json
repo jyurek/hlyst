@@ -28,6 +28,6 @@
     "android": {
       "package": "dev.verylargenumbers.hlyst"
     },
-    "plugins": ["expo-sqlite", "react-native-track-player"]
+    "plugins": ["expo-sqlite"]
   }
 }
