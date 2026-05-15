@@ -9,6 +9,7 @@ import { registerBackgroundFetch } from './src/tasks/backgroundRefreshTask'
 import { LibraryScreen } from './src/screens/LibraryScreen'
 import { PlayerScreen } from './src/screens/PlayerScreen'
 import { QueueScreen } from './src/screens/QueueScreen'
+import { FullPlayerScreen } from './src/screens/FullPlayerScreen'
 import type { Episode, Subscription } from './src/db/types'
 
 type Tab = 'library' | 'queue'
@@ -95,6 +96,17 @@ export default function App() {
           podcastName={currentPodcastName}
           onQueuePress={() => setActiveTab('queue')}
           onExpand={() => setShowFullPlayer(true)}
+        />
+      ) : null}
+
+      {currentEpisode ? (
+        <FullPlayerScreen
+          visible={showFullPlayer}
+          onDismiss={() => setShowFullPlayer(false)}
+          episode={currentEpisode}
+          imageUrl={currentSubscriptionImageUrl}
+          podcastName={currentPodcastName}
+          playerService={playerService.current}
         />
       ) : null}
 
