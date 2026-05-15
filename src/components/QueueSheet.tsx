@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native'
 import type { Episode } from '../db/types'
 
@@ -31,7 +32,6 @@ export interface QueueSheetProps {
   onReorder: (fromIndex: number, toIndex: number) => void
 }
 
-const SHEET_HEIGHT = Dimensions.get('window').height * 0.75
 const DISMISS_THRESHOLD = -80
 
 export function QueueSheet({
@@ -43,15 +43,25 @@ export function QueueSheet({
   onRemove,
   onReorder,
 }: QueueSheetProps) {
-  const translateY = useRef(new Animated.Value(-SHEET_HEIGHT)).current
+  const { height } = useWindowDimensions()
+  const sheetHeight = height * 0.75
+
+  const translateY = useRef(new Animated.Value(-Dimensions.get('window').height * 0.75)).current
 
   useEffect(() => {
     Animated.timing(translateY, {
-      toValue: visible ? 0 : -SHEET_HEIGHT,
+      toValue: visible ? 0 : -sheetHeight,
       duration: 300,
       useNativeDriver: true,
     }).start()
-  }, [visible, translateY])
+  }, [visible, translateY, sheetHeight])
+
+  useEffect(() => {
+    if (!visible) translateY.setValue(-sheetHeight)
+  }, [sheetHeight, visible, translateY])
+
+  const sheetHeightRef = useRef(sheetHeight)
+  sheetHeightRef.current = sheetHeight
 
   const panResponder = useRef(
     PanResponder.create({
@@ -67,7 +77,7 @@ export function QueueSheet({
         if (gestureState.dy < DISMISS_THRESHOLD) {
           // Dragged far enough up — dismiss
           Animated.timing(translateY, {
-            toValue: -SHEET_HEIGHT,
+            toValue: -sheetHeightRef.current,
             duration: 200,
             useNativeDriver: true,
           }).start(onDismiss)
@@ -82,10 +92,12 @@ export function QueueSheet({
     }),
   ).current
 
-  if (!visible) return null
-
   return (
-    <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]} testID="queue-sheet">
+    <Animated.View
+      pointerEvents={visible ? 'auto' : 'none'}
+      style={[styles.sheet, { height: sheetHeight, transform: [{ translateY }] }]}
+      testID="queue-sheet"
+    >
       <View style={styles.header}>
         <Text style={styles.headerText}>Queue</Text>
       </View>
@@ -186,7 +198,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: SHEET_HEIGHT,
     backgroundColor: '#1a1a2e',
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,

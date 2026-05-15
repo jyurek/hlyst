@@ -70,6 +70,10 @@ jest.mock('react-native', () => {
     get: (_dim: string) => ({ width: 390, height: 844 }),
   }
 
+  function useWindowDimensions() {
+    return { width: 390, height: 844 }
+  }
+
   return {
     View,
     Text,
@@ -79,6 +83,7 @@ jest.mock('react-native', () => {
     PanResponder,
     StyleSheet,
     Dimensions,
+    useWindowDimensions,
   }
 })
 
@@ -163,13 +168,24 @@ describe('QueueSheet', () => {
     jest.clearAllMocks()
   })
 
-  it('is not rendered when visible is false', () => {
+  it('is present in the tree but non-interactive when visible is false', () => {
     let instance!: ReturnType<typeof create>
     act(() => {
       instance = create(<QueueSheet {...baseProps} visible={false} />)
     })
     const results = findAllByTestId(instance, 'queue-sheet')
-    expect(results).toHaveLength(0)
+    expect(results).toHaveLength(1)
+    const node = results[0] as { props: Record<string, unknown> }
+    expect(node.props.pointerEvents).toBe('none')
+  })
+
+  it('is present in the tree even when visible is false', () => {
+    let instance!: ReturnType<typeof create>
+    act(() => {
+      instance = create(<QueueSheet {...baseProps} visible={false} />)
+    })
+    const results = findAllByTestId(instance, 'queue-sheet')
+    expect(results).toHaveLength(1)
   })
 
   it('renders the sheet when visible is true', () => {
@@ -179,6 +195,8 @@ describe('QueueSheet', () => {
     })
     const results = findAllByTestId(instance, 'queue-sheet')
     expect(results.length).toBeGreaterThan(0)
+    const node = results[0] as { props: Record<string, unknown> }
+    expect(node.props.pointerEvents).toBe('auto')
   })
 
   it('shows the now-playing episode title', () => {
