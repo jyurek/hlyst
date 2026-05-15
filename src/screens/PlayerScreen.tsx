@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native'
 import { usePlaybackState, useProgress, State } from 'react-native-track-player'
 import type { Episode } from '../db/types'
 import type { PlayerService } from '../services/playerService'
@@ -6,67 +6,78 @@ import type { PlayerService } from '../services/playerService'
 interface Props {
   episode: Episode
   playerService: PlayerService
+  imageUrl: string | null
+  podcastName: string
+  onQueuePress?: () => void
+  onExpand?: () => void
 }
 
-const SPEEDS = [0.75, 1, 1.25, 1.5, 2] as const
-
-export function PlayerScreen({ episode, playerService }: Props) {
+export function PlayerScreen({
+  episode,
+  playerService,
+  imageUrl,
+  podcastName,
+  onQueuePress,
+  onExpand,
+}: Props) {
   const playbackState = usePlaybackState()
   const progress = useProgress()
   const isPlaying = playbackState.state === State.Playing
 
-  const elapsed = Math.floor(progress.position)
-  const total = Math.floor(progress.duration || episode.duration || 0)
-
-  function fmt(s: number) {
-    const m = Math.floor(s / 60)
-    const sec = s % 60
-    return `${m}:${String(sec).padStart(2, '0')}`
-  }
+  const elapsed = progress.position
+  const total = progress.duration || episode.duration || 0
+  const progressFraction = total > 0 ? Math.min(elapsed / total, 1) : 0
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title} numberOfLines={2}>
-        {episode.title}
-      </Text>
-
-      <Text style={styles.time}>
-        {fmt(elapsed)} / {fmt(total)}
-      </Text>
-
-      <View style={styles.controls}>
+      <View style={styles.row}>
         <TouchableOpacity
-          style={styles.skipBtn}
-          onPress={() => playerService.seekTo(Math.max(0, progress.position - 15))}
+          testID="expand-btn"
+          style={styles.expandArea}
+          onPress={onExpand}
+          activeOpacity={0.7}
         >
-          <Text style={styles.skipText}>-15</Text>
+          {imageUrl ? (
+            <Image testID="artwork-image" source={{ uri: imageUrl }} style={styles.artwork} />
+          ) : (
+            <View testID="artwork-placeholder" style={styles.artworkPlaceholder} />
+          )}
+          <View style={styles.textArea}>
+            <Text style={styles.title} numberOfLines={1}>
+              {episode.title}
+            </Text>
+            <Text style={styles.subtitle} numberOfLines={1}>
+              {podcastName}
+            </Text>
+          </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.playBtn}
-          onPress={() => (isPlaying ? playerService.pause() : playerService.play())}
-        >
-          <Text style={styles.playText}>{isPlaying ? '⏸' : '▶'}</Text>
-        </TouchableOpacity>
+        <View style={styles.controls}>
+          <TouchableOpacity testID="queue-btn" style={styles.iconBtn} onPress={onQueuePress}>
+            <Text style={styles.iconText}>≡</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.skipBtn}
-          onPress={() => playerService.seekTo(progress.position + 30)}
-        >
-          <Text style={styles.skipText}>+30</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            testID="play-pause-btn"
+            style={styles.iconBtn}
+            onPress={() => (isPlaying ? playerService.pause() : playerService.play())}
+          >
+            <Text style={styles.iconText}>{isPlaying ? '⏸' : '▶'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            testID="skip-forward-btn"
+            style={styles.iconBtn}
+            onPress={() => playerService.seekTo(progress.position + 30)}
+          >
+            <Text style={styles.iconText}>⏩</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.speeds}>
-        {SPEEDS.map((rate) => (
-          <TouchableOpacity
-            key={rate}
-            style={styles.speedBtn}
-            onPress={() => playerService.setSpeed(rate)}
-          >
-            <Text style={styles.speedText}>{rate}×</Text>
-          </TouchableOpacity>
-        ))}
+      <View testID="progress-bar" style={styles.progressTrack}>
+        <View style={[styles.progressFill, { flex: progressFraction }]} />
+        <View style={{ flex: 1 - progressFraction }} />
       </View>
     </View>
   )
@@ -77,36 +88,56 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#ddd',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
   },
-  title: { fontSize: 15, fontWeight: '600', marginBottom: 6 },
-  time: { fontSize: 12, color: '#666', marginBottom: 12 },
-  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 },
-  playBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  playText: { fontSize: 22, color: '#fff' },
-  skipBtn: {
+  expandArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minWidth: 0,
+  },
+  artwork: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+  },
+  artworkPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+  },
+  textArea: {
+    flex: 1,
+    minWidth: 0,
+  },
+  title: { fontSize: 14, fontWeight: '600', color: '#111' },
+  subtitle: { fontSize: 12, color: '#888', marginTop: 2 },
+  controls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  skipText: { fontSize: 13, fontWeight: '600', color: '#333' },
-  speeds: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 12 },
-  speedBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-    backgroundColor: '#e8e8e8',
+  iconText: { fontSize: 18 },
+  progressTrack: {
+    height: 2,
+    flexDirection: 'row',
+    backgroundColor: '#e0e0e0',
   },
-  speedText: { fontSize: 13, color: '#333' },
+  progressFill: {
+    backgroundColor: '#007AFF',
+  },
 })
