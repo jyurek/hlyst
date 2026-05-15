@@ -52,7 +52,10 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-track-player)"
     ],
     "moduleNameMapper": {
-      "react-native/Libraries/NativeComponent/ViewConfigIgnore": "<rootDir>/__mocks__/stubs/ViewConfigIgnore.js"
+      "react-native/Libraries/NativeComponent/ViewConfigIgnore": "<rootDir>/__mocks__/stubs/ViewConfigIgnore.js",
+      "react-native-track-player": "<rootDir>/__mocks__/stubs/react-native-track-player.js",
+      "expo-background-task": "<rootDir>/__mocks__/stubs/expo-background-task.js",
+      "expo-task-manager": "<rootDir>/__mocks__/stubs/expo-task-manager.js"
     }
   },
   "lint-staged": {
