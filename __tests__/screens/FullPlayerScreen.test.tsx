@@ -253,4 +253,47 @@ describe('FullPlayerScreen', () => {
     expect(playerService.setSpeed).toHaveBeenLastCalledWith(1)
     expect(getAllText(btn())).toBe('1.0×')
   })
+
+  it('resets speed to 1× when a different episode is rendered', () => {
+    const playerService = makePlayerService()
+    const episodeA = makeEpisode({ id: 'ep-1', title: 'Episode A' })
+    const episodeB = makeEpisode({ id: 'ep-2', title: 'Episode B' })
+
+    let instance: ReturnType<typeof create>
+    act(() => {
+      instance = create(
+        <FullPlayerScreen
+          visible={true}
+          onDismiss={jest.fn()}
+          episode={episodeA}
+          imageUrl={null}
+          podcastName={null}
+          playerService={playerService}
+        />,
+      )
+    })
+
+    const btn = () => findByTestId(instance!, 'speed-btn')
+
+    // Advance speed away from 1×
+    act(() => btn().props.onPress())
+    expect(getAllText(btn())).toBe('1.25×')
+
+    // Swap to a different episode
+    act(() => {
+      instance!.update(
+        <FullPlayerScreen
+          visible={true}
+          onDismiss={jest.fn()}
+          episode={episodeB}
+          imageUrl={null}
+          podcastName={null}
+          playerService={playerService}
+        />,
+      )
+    })
+
+    // Speed should be back to 1×
+    expect(getAllText(btn())).toBe('1.0×')
+  })
 })

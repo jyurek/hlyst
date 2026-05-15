@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -47,6 +47,10 @@ export function FullPlayerScreen({
 
   const [speedIndex, setSpeedIndex] = useState(1) // default 1× is index 1
   const currentSpeed = SPEEDS[speedIndex]
+
+  useEffect(() => {
+    setSpeedIndex(1)
+  }, [episode.id])
 
   const elapsed = Math.floor(progress.position)
   const total = Math.floor(progress.duration || episode.duration || 0)
