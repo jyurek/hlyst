@@ -22,6 +22,7 @@ export default function App() {
   )
   const [currentPodcastName, setCurrentPodcastName] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('library')
+  const [showFullPlayer, setShowFullPlayer] = useState(false)
   const playerService = useRef<PlayerService>(createPlayerService())
 
   useEffect(() => {
@@ -52,8 +53,12 @@ export default function App() {
     setCurrentEpisode(episode)
     setCurrentSubscriptionImageUrl(sub.imageUrl)
     setCurrentPodcastName(sub.title)
-    await playerService.current.loadEpisode(episode)
-    await playerService.current.play()
+    try {
+      await playerService.current.loadEpisode(episode)
+      await playerService.current.play()
+    } catch (err) {
+      console.error('[App] failed to start playback:', err)
+    }
   }
 
   if (!db) {
@@ -89,6 +94,7 @@ export default function App() {
           imageUrl={currentSubscriptionImageUrl}
           podcastName={currentPodcastName}
           onQueuePress={() => setActiveTab('queue')}
+          onExpand={() => setShowFullPlayer(true)}
         />
       ) : null}
 
