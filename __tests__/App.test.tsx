@@ -30,7 +30,9 @@ jest.mock('react-native', () => {
 jest.mock('../src/screens/LibraryScreen', () => ({ LibraryScreen: jest.fn(() => null) }))
 jest.mock('../src/screens/PlayerScreen', () => ({ PlayerScreen: () => null }))
 jest.mock('../src/screens/QueueScreen', () => ({ QueueScreen: () => null }))
+
 jest.mock('../src/screens/FullPlayerScreen', () => ({ FullPlayerScreen: () => null }))
+jest.mock('../src/components/QueueSheet', () => ({ QueueSheet: () => null }))
 jest.mock('../src/db/database', () => ({ openDatabase: jest.fn() }))
 jest.mock('../src/services/subscriptionService', () => ({
   createSubscriptionService: jest.fn(),

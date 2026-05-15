@@ -10,6 +10,7 @@ import { LibraryScreen } from './src/screens/LibraryScreen'
 import { PlayerScreen } from './src/screens/PlayerScreen'
 import { QueueScreen } from './src/screens/QueueScreen'
 import { FullPlayerScreen } from './src/screens/FullPlayerScreen'
+import { QueueSheet } from './src/components/QueueSheet'
 import type { Episode, Subscription } from './src/db/types'
 
 type Tab = 'library' | 'queue'
@@ -23,6 +24,7 @@ export default function App() {
   )
   const [currentPodcastName, setCurrentPodcastName] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('library')
+  const [showQueue, setShowQueue] = useState(false)
   const [showFullPlayer, setShowFullPlayer] = useState(false)
   const playerService = useRef<PlayerService>(createPlayerService())
 
@@ -88,13 +90,23 @@ export default function App() {
         )}
       </View>
 
+      <QueueSheet
+        visible={showQueue}
+        onDismiss={() => setShowQueue(false)}
+        currentEpisode={currentEpisode}
+        currentPodcastName={currentPodcastName || null}
+        queueItems={[]}
+        onRemove={() => {}}
+        onReorder={() => {}}
+      />
+
       {currentEpisode ? (
         <PlayerScreen
           episode={currentEpisode}
           playerService={playerService.current}
           imageUrl={currentSubscriptionImageUrl}
           podcastName={currentPodcastName}
-          onQueuePress={() => setActiveTab('queue')}
+          onQueuePress={() => setShowQueue(true)}
           onExpand={() => setShowFullPlayer(true)}
         />
       ) : null}
