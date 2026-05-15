@@ -1,6 +1,6 @@
 module.exports = {
-  defineTask: jest.fn(),
-  isTaskRegisteredAsync: jest.fn().mockResolvedValue(false),
-  unregisterTaskAsync: jest.fn().mockResolvedValue(undefined),
+  defineTask: () => {},
+  isTaskRegisteredAsync: () => Promise.resolve(false),
+  unregisterTaskAsync: () => Promise.resolve(),
   TaskManagerTaskBody: {},
 }
